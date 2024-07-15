@@ -1,36 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import styles from '../styles/Home.module.css';
 
-const Home = () => {
-    const [number, setNumber] = useState<number | undefined>(undefined);
-    const [result, setResult] = useState<string>('');
+interface GuidanceData {
+    topic: string;
+    guidance: string;
+    status: string;
+    date: string;
+}
 
-    const checkNumber = async () => {
-        if (number !== undefined) {
-            const response = await fetch('/api/check', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ value: number })
-            });
+export default function Home() {
+    const [guidanceData, setGuidanceData] = useState<GuidanceData[]>([]);
+
+    const scrapeData = async () => {
+        try {
+            const response = await fetch('/api/scrape');
             const data = await response.json();
-            setResult(`Lucas Number: ${data.result}, Calculation Time: ${data.duration.toFixed(6)} seconds`);
+            setGuidanceData(data);
+        } catch (error) {
+            console.error('Error fetching scraped data:', error);
         }
     };
 
     return (
-        <div>
-            <h1>Lucas Number</h1>
-            <input
-                type="number"
-                value={number !== undefined ? number : ''}
-                onChange={(e) => setNumber(parseInt(e.target.value))}
-                placeholder="Enter a number"
-            />
-            <button onClick={checkNumber}>Check</button>
-            <p id="result">{result}</p>
+        <div className={styles.container}>
+            <h1>FDA Guidance Documents</h1>
+            <button className={styles.scrapeButton} onClick={scrapeData}>Scrape Data</button>           
+            <table className={styles.dataTable}>
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Guidance</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {guidanceData.map((row, index) => (
+                        <tr key={index}>
+                            <td>{row.topic}</td>
+                            <td>{row.guidance}</td>
+                            <td>{row.status}</td>
+                            <td>{row.date}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
-};
-
-export default Home;
+}
