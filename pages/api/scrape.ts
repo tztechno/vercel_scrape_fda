@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }).get();
 
             // 最新の100個のアイテムに制限
-            const limitedData = data.slice(0, 100);
+            const limitedData = data.slice(0, 30);
 
             res.status(200).json(limitedData);
         } catch (error) {
